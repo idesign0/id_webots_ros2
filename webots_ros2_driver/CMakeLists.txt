@@ -176,7 +176,7 @@ if ($ENV{ROS_DISTRO} MATCHES "humble" OR $ENV{ROS_DISTRO} MATCHES "jazzy")
   target_link_libraries(driver
     ${WEBOTS_LIB}
     ${Python_LIBRARIES}
-    yaml-cpp
+    yaml-cpp::yaml-cpp
   )
 else()
   target_link_libraries(driver
@@ -192,7 +192,7 @@ else()
     tinyxml2::tinyxml2
     ${WEBOTS_LIB}
     ${Python_LIBRARIES}
-    yaml-cpp
+    yaml-cpp::yaml-cpp
   )
 endif()
 
