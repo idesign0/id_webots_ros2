@@ -20,12 +20,14 @@ jobs:
         if: matrix.source == 'this-branch'
         with:
           path: src/webots_ros2
+          submodules: recursive
       - uses: actions/checkout@v4
         if: matrix.source == 'upstream-master'
         with:
           repository: cyberbotics/webots_ros2
           ref: master
           path: src/webots_ros2
+          submodules: recursive
       - name: Install dependencies
         shell: bash
         run: |
