@@ -1,0 +1,49 @@
+name: Linux build check (driver + control)
+
+on:
+  push:
+    branches: [ci-linux-check]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [humble, jazzy]
+        source: [this-branch, upstream-master]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    container: ros:${{ matrix.distro }}
+    steps:
+      - uses: actions/checkout@v4
+        if: matrix.source == 'this-branch'
+        with:
+          path: src/webots_ros2
+      - uses: actions/checkout@v4
+        if: matrix.source == 'upstream-master'
+        with:
+          repository: cyberbotics/webots_ros2
+          ref: master
+          path: src/webots_ros2
+      - name: Install dependencies
+        shell: bash
+        run: |
+          apt-get update
+          rosdep update --rosdistro ${{ matrix.distro }}
+          cd src/webots_ros2
+          rosdep install -y --rosdistro ${{ matrix.distro }} --ignore-src \
+            --from-paths webots_ros2_msgs webots_ros2_importer webots_ros2_driver webots_ros2_control
+      - name: Build
+        shell: bash
+        run: |
+          source /opt/ros/${{ matrix.distro }}/setup.bash
+          colcon build --base-paths src/webots_ros2 \
+            --packages-up-to webots_ros2_driver webots_ros2_control \
+            --event-handlers console_cohesion+
+      - name: Show where the driver links Webots
+        if: success()
+        shell: bash
+        run: |
+          ldd install/webots_ros2_driver/lib/webots_ros2_driver/driver | grep -iE 'controller|driver|car|yaml'
+          ls install/webots_ros2_driver/lib/controller
